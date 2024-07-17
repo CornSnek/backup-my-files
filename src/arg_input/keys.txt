@@ -1,0 +1,107 @@
+[Format]:
+
+"[Key Name]" (Type) (Required|Default=[Value]) - Definition?
+"[Key Name]" (object) (Required|Optional) <
+  - Definition?
+  "[Key Name]" (Type) (Required|Default=[Value]) - Definition
+  ...
+>
+"[Key Name]" (union) (Required|Default=<"[Key Name]"=[Value]>) <
+  - Definition?
+  "[Key Name]" (Type) ?(Required|Default=[Value]) - Definition?
+>
+"[Key Name]" (enum) (Required|Default=[Value]) <
+  - Definition?
+  "[Key Name]" - Definition?
+  "[Key Name]" - Definition?
+  "[Key Name]", "[Key Name]", "[Key Name]", ...
+>
+
+Only one [Key Name] for a (union) or (enum) type is used.
+Types or Definitions can have a ? appended to them to signify that they are optional
+(void) just means use an empty object for the key parameter ({{}})
+
+[Keys]:
+
+"output_dir" (string) (Required) - The global output directory where the directory/tar files will be placed.
+"max_backups" (number) (Default=10)
+"backups" (object) (Required) <
+  - object that stores all "backup_files" within the directory or tar file path ["output_dir"]/["output_name"]
+  "name" (string) (Required) - The name of the backup object. Not used, but printed.
+  "type" (union) (Required) <
+    "directory" (void) (Required) <
+      - All the backup files within the "backups" object are stored in a directory.
+    >
+    "tar" (union?) (Required) <
+      - All the backup files within the "backups" object are stored in a tar file. An option to compress
+      the file can be choses from the following: 'gzip' and 'zlib'. The file is stored in a tar.gz or tar.zlib file
+      respectively and the .tar file is kept (In case of corruption from the compression).
+      "gzip", "zlib" (enum) (Required) <
+        --These give the levels of compression that you can use. Only "level_4" to "level_9" can be used.
+        "fast", "level_4", "level_5", "level_6", "default", "level_7", "level_8", "level_9", "best"
+      >
+    >
+  >
+  "search_dir" (string) (Required) - The directory where the program will search in.
+  "output_name" (string) (Required) - The file name where the program will store the files within "output_dir".
+    Note: Date format specifiers can be used. See [Date format specifiers] for more information.
+  "backup_files" (array) (Required) <
+    "name" (string) (Required) - The file or directory relative to "search_dir". It cannot be
+      an absolute path or search outside it.
+    "dir_limit" (number?) (Default=null) - The number of nested directories the program will search until it skips it
+      and subdirectories. Does not affect files. For example: If dir_limit is 4, a/b/c/d (directory) will be searched, a/b/c/d/e.txt
+      will be searched (file), but a/b/c/d/e (directory) will be skipped including subdirectories. null means that all directories will
+      be searched.
+    "filters" (array) (Optional) <
+      - This array object helps allow or disallow certain file names, depths, from being copied to the "output_name" file.
+      "component" (enum) (Default="file") <
+        "file" - This filter will affect files only.
+        "directory" - This filter will affect directories only.
+        "all" - This filter will affect all files and directories.
+      >
+      "type" (enum) (Required) <
+        "include" - If this filter is not passed, the file will not be copied.
+        "exclude" - If this filter is passed, the file will not be copied.
+      >
+      "value" - String to include/exclude for a filename. Limited regular expressions are included and described below:
+        - `^` can be appended at the beginning to let the filter search only at the beginning of the filename.
+        - `$` can be appended at the end to let the filter search only at the end of the filename.
+        - `|` can be used to allow multiple or alternating values. If at least one word has been accepted, pass the filter if "include", or fail if "exclude".
+            - Parenthesis enclosing the alternating values are required for `|`. Example `(ab|cde|fghi)` in an
+              "include" filter allows filenames containing either ab, cde, or fghi.
+            - Can be combined with both `^` and `$` anchors to allow either one filename exactly specified in the group.
+        Value examples using special characters: `word`, `^prefix`, `.txt$`, `(one|two|three)`, `(.py|.zig|.c)$`, `^(main.zig|build.zig)$`
+      "depth_limit" (union) (Default=<"none" (void) (Required)>) <
+        - Determines the directory depth of when the filter should be active. For example, "none" allows all depths, "gte" and "lte" affects the
+          directories greater or equal than or less than or equal to the current depth respectively. "range" is a combination of both.
+        "none" (void) (Required) - The filter will use all depths.
+        "gte" (number) (Required) - The filter will use depths greater or equal to this number.
+        "lte" (number) (Required) - The filter will use depths less or equal to this number. 
+        "range" (object) (Required) <
+          - The filter will use depths between "min" and "max".
+          "min" (number) (Required)
+          "max" (number) (Required)
+        >
+      >
+    >
+  >
+>
+
+[Date format specifiers]:
+
+This can be used on "output_name" to create a directory or tar file to transform to the values detailed below.
+Valid format specifiers based from https://linux.die.net/man/1/date
+- `%%` a literal %
+- `%a` abbreviated weekday name (e.g., Sun)
+- `%A` full weekday name (e.g. Sunday)
+- `%b` abbreviated month name (e.g., Jan)
+- `%B` full month name (e.g., January)
+- `%d` day of month (e.g, 01)
+- `%H` hour (00..23)
+- `%I` hour (01..12)
+- `%m` month (01..12)
+- `%M` minute (00..59)
+- `%p` AM or PM
+- `%P` am or pm
+- `%S` second (00..60)
+- `%Y` year

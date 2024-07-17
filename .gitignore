@@ -1,0 +1,4 @@
+test_directory/
+.vscode/
+.zig-cache/
+zig-out/

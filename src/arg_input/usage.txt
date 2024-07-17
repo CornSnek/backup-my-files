@@ -1,0 +1,18 @@
+Usage: ZigCopy [options] [values?]
+
+Backup files using options from a .json file.
+
+Options:
+  -h, --help      Show this help message and exit.
+  -i, --input     Runs backup objects using a .json file. (Example: ZigCopy -i input.json). See --keys.
+  -b, --backup    Run backup objects only containing the key 'backups.name'.
+  -s, --scan      Only scans files without copying to backup files by showing information which files are
+                  accepted/rejected by filters.
+  -k, --keys      See the keys required for the .json file.
+  -l, --logs      Outputs log information of different logs. Valid options: JSON, FileExtra, Filters.
+                  Multiple logs can be used by separating each with '/'. (Example: ZigCopy -l JSON/FileExtra)
+  -v, --verbose   Outputs debugging log information when backing up files. (Same as ZigCopy -l JSON/FileExtra/Filters)
+  -q, --quiet     Disables all log information when backing up files. The only output that is shown is the progress
+                  bar for each backup object.
+
+  
